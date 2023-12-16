@@ -1,6 +1,6 @@
 import axios from 'axios';
 import Notiflix from 'notiflix';
-import SimpleLightbox from 'simplelightbox';
+import simpleLightbox from 'simplelightbox';
 import 'simplelightbox/dist/simple-lightbox.min.css';
 
 const form = document.querySelector('#search-form');
@@ -8,26 +8,6 @@ const gallery = document.querySelector('.gallery');
 const more = document.querySelector('.load-more');
 const input = document.querySelector('input[name="searchQuery"]');
 const baseURL = 'https://pixabay.com/api/';
-
-// const image = `
-//   <div class="photo-card">
-//     <img src="${hit.webformatURL}" alt="${hit.tags}" loading="lazy" />
-//     <div class="info">
-//       <p class="info-item">
-//         <b>Likes ${hit.likes}</b>
-//       </p>
-//       <p class="info-item">
-//         <b>Views ${hit.views}</b>
-//       </p>
-//       <p class="info-item">
-//         <b>Comments ${hit.comments}</b>
-//       </p>
-//       <p class="info-item">
-//         <b>Downloads ${hit.downloads}</b>
-//       </p>
-//     </div>
-//   </div>
-// `;
 
 form.addEventListener('submit', event => {
   event.preventDefault();
@@ -51,15 +31,18 @@ form.addEventListener('submit', event => {
     .get(baseURL, options)
     .then(res => {
       console.log('Response:', res.data);
+      console.log(res.data);
+
       console.log(res.data.hits);
+
       res.data.hits.forEach(hit => {
         gallery.insertAdjacentHTML(
           'beforeend',
           `
           <div class="photo-card">
-          <div class="pic">
+          <a class="pic" href="${hit.webformatURL}">
     <img src="${hit.webformatURL}" alt="${hit.tags}" loading="lazy" />
-    </div>
+    </a>
     <div class="info">
       <p class="info-item">
         <b>Likes</b>
@@ -77,18 +60,28 @@ form.addEventListener('submit', event => {
         <span>${hit.comments}</span>
       </p>
       <p class="info-item">
-        <b>Downloads </b>
-        <br>
-        <span>${hit.downloads}</span>
+      <b>Downloads </b>
+      <br>
+      <span>${hit.downloads}</span>
       </p>
-    </div>
-  </div>
-`
+      </div>
+      </div>
+      `
         );
+      });
+      Notiflix.Notify.success(`Hooray! We found ${res.data.totalHits} images.`);
+    })
+    .then(res => {
+      var lightbox = new simpleLightbox('.gallery a', {
+        captionsData: 'alt',
+        captionDelay: 250,
       });
     })
     .catch(error => {
       console.error('Error:', error);
+      Notiflix.Notify.failure(
+        'Sorry, there are no images matching your search query. Please try again.'
+      );
     });
 });
 
@@ -99,8 +92,3 @@ form.addEventListener('submit', event => {
 // views - liczba wyświetleń.
 // comments - liczba komentarzy.
 // downloads - liczba pobrań.
-
-var lightbox = new SimpleLightbox('.gallery img', {
-  captionsData: 'alt',
-  captionDelay: 250,
-});
