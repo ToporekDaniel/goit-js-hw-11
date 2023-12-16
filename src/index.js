@@ -1,6 +1,6 @@
 import axios from 'axios';
 import Notiflix from 'notiflix';
-import simpleLightbox from 'simplelightbox';
+import SimpleLightbox from 'simplelightbox';
 import 'simplelightbox/dist/simple-lightbox.min.css';
 
 const form = document.querySelector('#search-form');
@@ -37,13 +37,13 @@ form.addEventListener('submit', event => {
 
   const options = {
     params: {
+      // opcje
       key: '41265249-e32640f8794e7a54bd81efaed',
       q: word,
       image_type: 'photo',
       orientation: 'horizontal',
       safesearch: true,
       per_page: 40,
-      // opcje
     },
   };
 
@@ -53,24 +53,33 @@ form.addEventListener('submit', event => {
       console.log('Response:', res.data);
       console.log(res.data.hits);
       res.data.hits.forEach(hit => {
-        console.log(hit.likes);
         gallery.insertAdjacentHTML(
           'beforeend',
           `
           <div class="photo-card">
+          <div class="pic">
     <img src="${hit.webformatURL}" alt="${hit.tags}" loading="lazy" />
+    </div>
     <div class="info">
       <p class="info-item">
-        <b>Likes ${hit.likes}</b>
+        <b>Likes</b>
+        <br>
+        <span>${hit.likes}</span>
       </p>
       <p class="info-item">
-        <b>Views ${hit.views}</b>
+        <b>Views </b>
+        <br>
+        <span>${hit.views}</span>
       </p>
       <p class="info-item">
-        <b>Comments ${hit.comments}</b>
+        <b>Comments </b>
+        <br>
+        <span>${hit.comments}</span>
       </p>
       <p class="info-item">
-        <b>Downloads ${hit.downloads}</b>
+        <b>Downloads </b>
+        <br>
+        <span>${hit.downloads}</span>
       </p>
     </div>
   </div>
@@ -90,3 +99,8 @@ form.addEventListener('submit', event => {
 // views - liczba wyświetleń.
 // comments - liczba komentarzy.
 // downloads - liczba pobrań.
+
+var lightbox = new SimpleLightbox('.gallery img', {
+  captionsData: 'alt',
+  captionDelay: 250,
+});
