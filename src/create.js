@@ -1,4 +1,10 @@
-export const image = `
+const gallery = document.querySelector('.gallery');
+
+export function createGallery(hits) {
+  hits.forEach(hit => {
+    gallery.insertAdjacentHTML(
+      'beforeend',
+      `
           <div class="photo-card">
           <a class="pic" href="${hit.webformatURL}">
     <img src="${hit.webformatURL}" alt="${hit.tags}" loading="lazy" />
@@ -26,4 +32,7 @@ export const image = `
       </p>
       </div>
       </div>
-      `;
+      `
+    );
+  });
+}

@@ -2,30 +2,34 @@ import axios from 'axios';
 import Notiflix from 'notiflix';
 import simpleLightbox from 'simplelightbox';
 import 'simplelightbox/dist/simple-lightbox.min.css';
+import { axiosConfig } from './axiosConfig';
+import { createGallery } from './create';
 
 const form = document.querySelector('#search-form');
 const gallery = document.querySelector('.gallery');
-const more = document.querySelector('.load-more');
+const moreBtn = document.querySelector('.load-more');
 const input = document.querySelector('input[name="searchQuery"]');
+const backBtn = document.querySelector('.back');
+
 const baseURL = 'https://pixabay.com/api/';
+
+moreBtn.style.display = 'none';
+backBtn.style.display = 'none';
+
+let page = 1;
+
+var lightbox = new simpleLightbox('.gallery a', {
+  captionsData: 'alt',
+  captionDelay: 250,
+});
 
 form.addEventListener('submit', event => {
   event.preventDefault();
   gallery.innerHTML = '';
   const word = input.value;
-  console.log(word);
-
-  const options = {
-    params: {
-      // opcje
-      key: '41265249-e32640f8794e7a54bd81efaed',
-      q: word,
-      image_type: 'photo',
-      orientation: 'horizontal',
-      safesearch: true,
-      per_page: 40,
-    },
-  };
+  // console.log(word);
+  page = 1;
+  const options = axiosConfig(word, page);
 
   axios
     .get(baseURL, options)
@@ -35,47 +39,18 @@ form.addEventListener('submit', event => {
 
       console.log(res.data.hits);
 
-      res.data.hits.forEach(hit => {
-        gallery.insertAdjacentHTML(
-          'beforeend',
-          `
-          <div class="photo-card">
-          <a class="pic" href="${hit.webformatURL}">
-    <img src="${hit.webformatURL}" alt="${hit.tags}" loading="lazy" />
-    </a>
-    <div class="info">
-      <p class="info-item">
-        <b>Likes</b>
-        <br>
-        <span>${hit.likes}</span>
-      </p>
-      <p class="info-item">
-        <b>Views </b>
-        <br>
-        <span>${hit.views}</span>
-      </p>
-      <p class="info-item">
-        <b>Comments </b>
-        <br>
-        <span>${hit.comments}</span>
-      </p>
-      <p class="info-item">
-      <b>Downloads </b>
-      <br>
-      <span>${hit.downloads}</span>
-      </p>
-      </div>
-      </div>
-      `
-        );
-      });
+      createGallery(res.data.hits);
+
+      if (res.data.totalHits <= page * 40) {
+        moreBtn.style.display = 'none';
+      } else {
+        moreBtn.style.display = 'block';
+      }
       Notiflix.Notify.success(`Hooray! We found ${res.data.totalHits} images.`);
+      backBtn.style.display = 'block';
     })
     .then(res => {
-      var lightbox = new simpleLightbox('.gallery a', {
-        captionsData: 'alt',
-        captionDelay: 250,
-      });
+      lightbox.refresh();
     })
     .catch(error => {
       console.error('Error:', error);
@@ -85,10 +60,46 @@ form.addEventListener('submit', event => {
     });
 });
 
-// webformatURL - link do małego obrazka.
-// largeImageURL - link do dużego obrazka.
-// tags - wiersz z opisem obrazka. Będzie pasować do atrybutu alt.
-// likes - liczba “lajków”.
-// views - liczba wyświetleń.
-// comments - liczba komentarzy.
-// downloads - liczba pobrań.
+moreBtn.addEventListener('click', () => {
+  ++page;
+  const word = input.value;
+  const options = axiosConfig(word, page);
+
+  axios
+    .get(baseURL, options)
+    .then(res => {
+      console.log('Response:', res.data);
+      console.log(res.data);
+
+      console.log(res.data.hits);
+
+      createGallery(res.data.hits);
+
+      if (res.data.totalHits <= page * 40) {
+        moreBtn.style.display = 'none';
+        Notiflix.Notify.warning(
+          "We're sorry, but you've reached the end of search results."
+        );
+      } else {
+        moreBtn.style.display = 'block';
+      }
+
+      Notiflix.Notify.success(`More images ale loaded.`);
+    })
+    .then(() => {
+      lightbox.refresh();
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      Notiflix.Notify.failure(
+        'Sorry, there are no images matching your search query. Please try again.'
+      );
+    });
+});
+
+backBtn.addEventListener('click', () => {
+  window.scrollTo({
+    top: 0,
+    behavior: 'smooth',
+  });
+});
