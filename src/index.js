@@ -23,78 +23,66 @@ var lightbox = new simpleLightbox('.gallery a', {
   captionDelay: 250,
 });
 
-form.addEventListener('submit', event => {
+form.addEventListener('submit', async event => {
   event.preventDefault();
   gallery.innerHTML = '';
   const word = input.value;
-  // console.log(word);
   page = 1;
   const options = axiosConfig(word, page);
 
-  axios
-    .get(baseURL, options)
-    .then(res => {
-      // console.log(res.data);
-      // console.log(res.data.hits);
-      createGallery(res.data.hits);
-      moreBtn.style.display = 'block';
-      backBtn.style.display = 'block';
+  try {
+    const res = await axios.get(baseURL, options);
 
-      if (res.data.totalHits === 0) {
-        backBtn.style.display = 'none';
-        moreBtn.style.display = 'none';
-        Notiflix.Notify.failure(
-          'Sorry, there are no images matching your search query. Please try again.'
-        );
-      } else {
-        Notiflix.Notify.success(
-          `Hooray! We found ${res.data.totalHits} images.`
-        );
-        if (res.data.totalHits <= page * 40) {
-          moreBtn.style.display = 'none';
-          Notiflix.Notify.warning(
-            "We're sorry, but you've reached the end of search results."
-          );
-        }
-      }
-    })
-    .then(() => {
-      lightbox.refresh();
-    })
-    .catch(error => {
-      console.error('Error:', error);
-    });
-});
+    createGallery(res.data.hits);
+    moreBtn.style.display = 'block';
+    backBtn.style.display = 'block';
 
-moreBtn.addEventListener('click', () => {
-  ++page;
-  const word = input.value;
-  const options = axiosConfig(word, page);
-
-  axios
-    .get(baseURL, options)
-    .then(res => {
-      // console.log(res.data);
-      // console.log(res.data.hits);
-
-      createGallery(res.data.hits);
-      Notiflix.Notify.success(`More images ale loaded.`);
-
+    if (res.data.totalHits === 0) {
+      backBtn.style.display = 'none';
+      moreBtn.style.display = 'none';
+      Notiflix.Notify.failure(
+        'Sorry, there are no images matching your search query. Please try again.'
+      );
+    } else {
+      Notiflix.Notify.success(`Hooray! We found ${res.data.totalHits} images.`);
       if (res.data.totalHits <= page * 40) {
         moreBtn.style.display = 'none';
         Notiflix.Notify.warning(
           "We're sorry, but you've reached the end of search results."
         );
-      } else {
-        moreBtn.style.display = 'block';
       }
-    })
-    .then(() => {
-      lightbox.refresh();
-    })
-    .catch(error => {
-      console.error('Error:', error);
-    });
+    }
+
+    lightbox.refresh();
+  } catch (error) {
+    console.error('Error:', error);
+  }
+});
+
+moreBtn.addEventListener('click', async () => {
+  ++page;
+  const word = input.value;
+  const options = axiosConfig(word, page);
+
+  try {
+    const res = await axios.get(baseURL, options);
+
+    createGallery(res.data.hits);
+    Notiflix.Notify.success(`More images are loaded.`);
+
+    if (res.data.totalHits <= page * 40) {
+      moreBtn.style.display = 'none';
+      Notiflix.Notify.warning(
+        "We're sorry, but you've reached the end of search results."
+      );
+    } else {
+      moreBtn.style.display = 'block';
+    }
+
+    lightbox.refresh();
+  } catch (error) {
+    console.error('Error:', error);
+  }
 });
 
 backBtn.addEventListener('click', () => {
