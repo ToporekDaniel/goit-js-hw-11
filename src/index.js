@@ -36,27 +36,26 @@ form.addEventListener('submit', event => {
     .then(res => {
       // console.log(res.data);
       // console.log(res.data.hits);
-      if (res.data.totalHits > 0) {
-        Notiflix.Notify.success(
-          `Hooray! We found ${res.data.totalHits} images.`
-        );
-      } else {
+      createGallery(res.data.hits);
+      moreBtn.style.display = 'block';
+      backBtn.style.display = 'block';
+
+      if (res.data.totalHits === 0) {
         backBtn.style.display = 'none';
         moreBtn.style.display = 'none';
         Notiflix.Notify.failure(
           'Sorry, there are no images matching your search query. Please try again.'
         );
-      }
-      createGallery(res.data.hits);
-
-      if (res.data.totalHits <= page * 40) {
-        moreBtn.style.display = 'none';
-        Notiflix.Notify.warning(
-          "We're sorry, but you've reached the end of search results."
-        );
       } else {
-        moreBtn.style.display = 'block';
-        backBtn.style.display = 'block';
+        Notiflix.Notify.success(
+          `Hooray! We found ${res.data.totalHits} images.`
+        );
+        if (res.data.totalHits <= page * 40) {
+          moreBtn.style.display = 'none';
+          Notiflix.Notify.warning(
+            "We're sorry, but you've reached the end of search results."
+          );
+        }
       }
     })
     .then(() => {
