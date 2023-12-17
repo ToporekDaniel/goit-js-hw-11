@@ -34,29 +34,36 @@ form.addEventListener('submit', event => {
   axios
     .get(baseURL, options)
     .then(res => {
-      console.log('Response:', res.data);
-      console.log(res.data);
-
-      console.log(res.data.hits);
-
+      // console.log(res.data);
+      // console.log(res.data.hits);
+      if (res.data.totalHits > 0) {
+        Notiflix.Notify.success(
+          `Hooray! We found ${res.data.totalHits} images.`
+        );
+      } else {
+        backBtn.style.display = 'none';
+        moreBtn.style.display = 'none';
+        Notiflix.Notify.failure(
+          'Sorry, there are no images matching your search query. Please try again.'
+        );
+      }
       createGallery(res.data.hits);
 
       if (res.data.totalHits <= page * 40) {
         moreBtn.style.display = 'none';
+        Notiflix.Notify.warning(
+          "We're sorry, but you've reached the end of search results."
+        );
       } else {
         moreBtn.style.display = 'block';
+        backBtn.style.display = 'block';
       }
-      Notiflix.Notify.success(`Hooray! We found ${res.data.totalHits} images.`);
-      backBtn.style.display = 'block';
     })
-    .then(res => {
+    .then(() => {
       lightbox.refresh();
     })
     .catch(error => {
       console.error('Error:', error);
-      Notiflix.Notify.failure(
-        'Sorry, there are no images matching your search query. Please try again.'
-      );
     });
 });
 
@@ -68,12 +75,11 @@ moreBtn.addEventListener('click', () => {
   axios
     .get(baseURL, options)
     .then(res => {
-      console.log('Response:', res.data);
-      console.log(res.data);
-
-      console.log(res.data.hits);
+      // console.log(res.data);
+      // console.log(res.data.hits);
 
       createGallery(res.data.hits);
+      Notiflix.Notify.success(`More images ale loaded.`);
 
       if (res.data.totalHits <= page * 40) {
         moreBtn.style.display = 'none';
@@ -83,17 +89,12 @@ moreBtn.addEventListener('click', () => {
       } else {
         moreBtn.style.display = 'block';
       }
-
-      Notiflix.Notify.success(`More images ale loaded.`);
     })
     .then(() => {
       lightbox.refresh();
     })
     .catch(error => {
       console.error('Error:', error);
-      Notiflix.Notify.failure(
-        'Sorry, there are no images matching your search query. Please try again.'
-      );
     });
 });
 

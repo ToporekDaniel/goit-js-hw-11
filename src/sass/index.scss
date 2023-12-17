@@ -46,3 +46,13 @@ body {
 .info-item {
   justify-self: center;
 }
+
+.buttons {
+  background-color: aqua;
+  display: flex;
+  justify-content: space-evenly;
+}
+
+.buttons button {
+  margin: 20px;
+}
